@@ -6,6 +6,7 @@ static ALPHA: &str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 static PREFIX: &str = "1000.";
 static SEGMENT_LEN: usize = 24;
 static SEPERATORS: usize = 2;
+
 pub fn generate_client_id() -> String {
     //just temp code bro
     generate(ALPHA_LOWER)
