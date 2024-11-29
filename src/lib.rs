@@ -14,10 +14,23 @@ pub fn run(st: &str) {
 
 pub async fn handle_client(req: Request<impl hyper::body::Body + std::fmt::Debug>) -> Result<Response<Full<Bytes>>, Infallible> {
 
-    println!("{}", validate_req(&req));
+    if validate_req(&req) {
+        route_req(&req);
+    }
+
+    let st = generator::utils::generate_client_id();
+    run(&st[..]);
+    Ok(Response::new(Full::new(Bytes::from("Here i am"))))
+}
+
+pub fn route_req(req: &Request<impl hyper::body::Body>) {
 
     match req.method() {
         &Method::GET => {
+            match req.uri().path() {
+                "/oauth/v2/token" => println!("here:"),
+                _ => println!("mo")
+            }
         }
 
         &Method::POST => {
@@ -34,10 +47,6 @@ pub async fn handle_client(req: Request<impl hyper::body::Body + std::fmt::Debug
         }
         _ => println!("We dont supprt this method yet: {:?}", req.method())
     }
-
-    let st = generator::utils::generate_client_id();
-    run(&st[..]);
-    Ok(Response::new(Full::new(Bytes::from("Here i am"))))
 }
 
 pub fn validate_req(req: &Request<impl hyper::body::Body>) -> bool {
