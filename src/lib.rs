@@ -13,63 +13,79 @@ pub fn run(st: &str) {
 
 pub async fn handle_client(req: Request<impl hyper::body::Body + std::fmt::Debug>) -> Result<Response<Full<Bytes>>, Infallible> {
 
-    if validate_req(&req) {
-        route_req(&req);
+    if !validate_req(&req) {
+        let response = format!("Invalid endpoint {}\n", req.uri().path());
+        return Ok(Response::new(Full::new(Bytes::from(response))));
+    }
+
+    match route_req(&req) {
+        Ok(message) => println!("Route Ok={}", message),
+        Err(e) => println!("Route Err={}", e)
     }
 
     let st = generator::utils::generate_client_id();
     run(&st[..]);
-    Ok(Response::new(Full::new(Bytes::from("Here i am"))))
+    Ok(Response::new(Full::new(Bytes::from("Here i am\n"))))
 }
 
-pub fn route_req(req: &Request<impl hyper::body::Body>) {
+pub fn route_req(req: &Request<impl hyper::body::Body>) -> Result<String, String> {
 
     match req.method() {
         &Method::GET => {
             if let Some(endpoint) = Endpoint::from_path(req.uri().path()) {
                 match endpoint {
-                    Endpoint::Token => println!("Token Endpoint"),
-                    _ => println!("Unsuppported GET Endpoint"),
+                    Endpoint::Token => {
+                        println!("Token={:?}", endpoint);
+                        return Ok(String::from("token"))
+                    }
+                    _ => {
+                        println!("{:?}", endpoint);
+                        return Err(String::from("error with route"))
+                    }
                 }
             }
         }
         &Method::POST => {
             if let Some(endpoint) = Endpoint::from_path(req.uri().path()) {
+
                 match endpoint {
                     Endpoint::Create => {
-                        let c = match Client::new(req) {
-                            Ok(client) => client,
-                            Err(e) => 
-                        }
-                        println!("{}", Client::new(req));
+                        println!("Create={:?}", endpoint);
+                        return Ok(String::from("Client created"))
                     }
-                    Endpoint::Auth => println!("Creating auth"),
-                    Endpoint::Token => println!("creating Token"),
-                    Endpoint::Revoke => println!("Revoking Access"),
+                    Endpoint::Auth => {
+                        println!("Auth={:?}", endpoint);
+                        return Ok(String::from("Auth Token"))
+                    }
+                    Endpoint::Revoke => {
+                        println!("Revoke={:?}", endpoint);
+                        return Ok(String::from("Revoked Access"))
+                    }
+                    _ => {
+                        println!("Error EndPoint={:?}", endpoint);
+                        return Err(String::from("Bad Post"))
+                    }
                 }
             }
         }
-        &Method::PATCH => {
-            println!("This is a patch")
+        _ => {
+            println!("We dont supprt this method yet: {:?}", req.method());
+            return Ok(String::from("Some error"))
         }
-        &Method::DELETE => {
-            println!("This is a delete")
-        }
-        &Method::PUT => {
-            println!("This is a put")
-        }
-        _ => println!("We dont supprt this method yet: {:?}", req.method())
     }
+
+    Err(String::from("Oh my goodness"))
 }
 
 pub fn validate_req(req: &Request<impl hyper::body::Body>) -> bool {
     if Endpoint::variants().iter().any(|endpoint| req.uri().path() == endpoint.as_str()) {
-        return true;
+        return true
     }
     false
 }
 
 
+#[derive(Debug)]
 enum Endpoint {
     Token,
     Auth,
@@ -119,12 +135,13 @@ struct Client {
 
 
 impl Client {
-    fn new(&self, req: &Request<impl hyper::body::Body>) -> Result<Self, String> {
-        Ok(Client {
-            name: String::from("Michael"),
-            homepage_url: String::from("www.homepage.com/"),
-            redirect_url: String::from("www.redirect-url.com/"),
-        })
+    fn new(&self, req: &Request<impl hyper::body::Body>) -> Result<String, String> {
+        Ok(String::from("Created Client"))
+        //Ok(Client {
+        //    name: String::from("Michael"),
+        //    homepage_url: String::from("www.homepage.com/"),
+        //    redirect_url: String::from("www.redirect-url.com/"),
+        //})
     }
 }
 
