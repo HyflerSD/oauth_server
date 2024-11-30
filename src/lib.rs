@@ -4,6 +4,7 @@ use std::convert::Infallible;
 use hyper::body::Bytes;
 use std::error::Error;
 
+pub mod client;
 pub mod generator;
 
 pub fn run(st: &str) {
@@ -18,6 +19,7 @@ pub async fn handle_client(req: Request<impl hyper::body::Body + std::fmt::Debug
         return Ok(Response::new(Full::new(Bytes::from(response))));
     }
 
+    println!("{:#?}", client::Client::new(&req));
     match route_req(&req) {
         Ok(message) => println!("Route Ok={}", message),
         Err(e) => println!("Route Err={}", e)
@@ -122,26 +124,6 @@ impl Endpoint {
             Endpoint::Create,
         ];
         VARIANTS
-    }
-}
-
-
-struct Client {
-
-    name: String,
-    homepage_url: String,
-    redirect_url: String,
-}
-
-
-impl Client {
-    fn new(&self, req: &Request<impl hyper::body::Body>) -> Result<String, String> {
-        Ok(String::from("Created Client"))
-        //Ok(Client {
-        //    name: String::from("Michael"),
-        //    homepage_url: String::from("www.homepage.com/"),
-        //    redirect_url: String::from("www.redirect-url.com/"),
-        //})
     }
 }
 
