@@ -4,6 +4,7 @@ use std::convert::Infallible;
 use hyper::body::Bytes;
 use std::error::Error;
 
+pub mod db;
 pub mod client;
 pub mod generator;
 
@@ -13,6 +14,11 @@ pub fn run(st: &str) {
 
 
 pub async fn handle_client(req: Request<impl hyper::body::Body + std::fmt::Debug>) -> Result<Response<Full<Bytes>>, Infallible> {
+
+    match db::setup().await {
+        Ok(_) => println!("conntection successful"),
+        Err(e) => println!("Error: {:?}", e)
+    }
 
     if !validate_req(&req) {
         let response = format!("Invalid endpoint {}\n", req.uri().path());

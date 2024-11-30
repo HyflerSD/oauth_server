@@ -22,15 +22,15 @@ impl Client {
     }
 
     fn delete(&self) -> Result<(), String> {
-
+        Ok(())
     }
 
     fn validate_client(client_id: &str, client_secret: &str) -> Result<(), String> {
-
+        Ok(())
     }
 
-    fn revoke(&self) -> Result<_, String> {
-
+    fn revoke(&self) -> Result<(), String> {
+        Ok(())
     }
 }
 

@@ -10,3 +10,5 @@ http-body-util = "0.1"
 hyper-util = { version = "0.1", features = ["full"] }
 rand = "0.8.5"
 fastrand = "2.2.0"
+mysql="*"
+dotenv = "0.15.0"
