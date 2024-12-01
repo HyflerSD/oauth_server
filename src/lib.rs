@@ -15,10 +15,14 @@ pub fn run(st: &str) {
 
 pub async fn handle_client(req: Request<impl hyper::body::Body + std::fmt::Debug>) -> Result<Response<Full<Bytes>>, Infallible> {
 
-    match db::setup().await {
-        Ok(_) => println!("conntection successful"),
-        Err(e) => println!("Error: {:?}", e)
-    }
+    let pool = match db::setup().await {
+        Ok(p) => p,
+        Err(_) => return Ok(Response::new(Full::new(Bytes::from("500 Server Error\n".to_string()))))
+    };
+
+    let c = client::Client::_new();
+
+    println!("save pool: {:#?}", c.save(&pool));
 
     if !validate_req(&req) {
         let response = format!("Invalid endpoint {}\n", req.uri().path());
