@@ -20,16 +20,23 @@ pub async fn handle_client(req: Request<impl hyper::body::Body + std::fmt::Debug
         Err(_) => return Ok(Response::new(Full::new(Bytes::from("500 Server Error\n".to_string()))))
     };
 
-    let c = client::Client::_new();
+    let client_repository =  client::ClientRepository::new(&pool);
 
-    println!("save pool: {:#?}", c.save(&pool));
+    let c = match client::Client::from(&req) {
+        Ok(client) => client,
+        Err(e) => return Ok(Response::new(Full::new(Bytes::from(e)))),
+    };
+
+    println!("created={:?}", client_repository.create(&c));
+
+    println!("{:?}", c);
 
     if !validate_req(&req) {
         let response = format!("Invalid endpoint {}\n", req.uri().path());
         return Ok(Response::new(Full::new(Bytes::from(response))));
     }
 
-    println!("{:#?}", client::Client::new(&req));
+    //println!("{:#?}", client::Client::new(&req));
     match route_req(&req) {
         Ok(message) => println!("Route Ok={}", message),
         Err(e) => println!("Route Err={}", e)

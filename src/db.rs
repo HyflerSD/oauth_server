@@ -32,7 +32,7 @@ pub async fn setup() -> std::result::Result<DB, Box<dyn std::error::Error>> {
 
 impl DB {
     pub fn get_user(&self) -> Option<Client> {
-        Some(Client::_new())
+        Some(Client::new())
     }
 
     pub fn save_client(&self, client: &Client) -> Result<(), String> {

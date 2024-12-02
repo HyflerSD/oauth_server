@@ -9,44 +9,63 @@ use crate::db::DB;
 pub struct Client {
 
     name: String,
-    homepage_url: String,
-    redirect_url: String,
+    client_id: String,
+    client_secret: String,
+
 }
 
+pub struct ClientRepository<'a> {
+    db_conn: &'a DB,
+}
 
-impl Client {
-    pub fn new(req: &Request<impl hyper::body::Body>) -> Result<Self, String> {
-        //Need to check if client exists already when db is here dude
-        Ok(Client {
-            name: String::from("Michael"),
-            homepage_url: String::from("www.homepage.com/"),
-            redirect_url: String::from("www.redirect-url.com/"),
-        })
+impl<'a> ClientRepository<'a> {
+    pub fn new(db_conn: &'a DB) -> Self {
+        Self { db_conn }
     }
 
-    pub fn _new() -> Client {
-        //Need to check if client exists already when db is here dude
+    pub fn create(&self, req: &Client) -> Result<(), String> {
+        //Ok( Self { db_conn })
+        Ok(())
+    }
+
+    pub fn create_and_save(req: &Request<impl hyper::body::Body>) -> Result<(), String> {
+        //Ok( Self { db_conn })
+        Ok(())
+    }
+
+    pub fn delete(&self, client: &Client) -> Result<(), String> {
+        Ok(())
+    }
+
+    pub fn save(&self, client: &Client) -> Result<(), String> {
+        self.db_conn.save_client(client);
+        Ok(())
+    }
+
+    pub fn validate_client(&self, client_id: &str, client_secret: &str) -> Result<(), String> {
+        Ok(())
+    }
+
+    pub fn revoke(&self, client: &Client) -> Result<(), String> {
+        Ok(())
+    }
+}
+
+impl Client {
+    pub fn new() -> Self {
         Client {
-            name: String::from("_mmmm"),
-            homepage_url: String::from("_www.homepage.com/"),
-            redirect_url: String::from("_www.redirect-url.com/"),
+            name: String::from("Michael"),
+            client_id: String::from("www.homepage.com/"),
+            client_secret: String::from("www.redirect-url.com/"),
         }
     }
 
-    fn delete(&self) -> Result<(), String> {
-        Ok(())
-    }
-
-    fn save(&self, dbconn: DB) -> Result<(), String> {
-        dbconn.save_client(&self)
-    }
-
-    fn validate_client(client_id: &str, client_secret: &str) -> Result<(), String> {
-        Ok(())
-    }
-
-    fn revoke(&self) -> Result<(), String> {
-        Ok(())
+    pub fn from(req: &Request<impl hyper::body::Body>) -> Result<Self, String> {
+        Ok(Client {
+            name: String::from("Michael"),
+            client_id: String::from("www.homepage.com/"),
+            client_secret: String::from("www.redirect-url.com/"),
+        })
     }
 }
 
