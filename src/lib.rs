@@ -17,33 +17,37 @@ pub async fn handle_client(req: Request<impl hyper::body::Body + std::fmt::Debug
 
     let pool = match db::setup().await {
         Ok(p) => p,
-        Err(_) => return Ok(Response::new(Full::new(Bytes::from("500 Server Error\n".to_string()))))
+        Err(e) => {
+            println!("{:?}", e);
+            return Ok(Response::new(Full::new(Bytes::from("500 Server Error\n".to_string()))))
+        }
     };
 
-    let client_repository =  client::ClientRepository::new(&pool);
 
-    let c = match client::Client::from(&req) {
-        Ok(client) => client,
-        Err(e) => return Ok(Response::new(Full::new(Bytes::from(e)))),
-    };
+    //let client_repository = client::ClientRepository::new(&pool);
 
-    println!("created={:?}", client_repository.create(&c));
+    //let c = match client::Client::from(&req) {
+    //    Ok(client) => client,
+    //    Err(e) => return Ok(Response::new(Full::new(Bytes::from(e)))),
+    //};
 
-    println!("{:?}", c);
+    //println!("created={:?}", client_repository.create(&c));
 
-    if !validate_req(&req) {
-        let response = format!("Invalid endpoint {}\n", req.uri().path());
-        return Ok(Response::new(Full::new(Bytes::from(response))));
-    }
+    //println!("{:?}", c);
 
-    //println!("{:#?}", client::Client::new(&req));
-    match route_req(&req) {
-        Ok(message) => println!("Route Ok={}", message),
-        Err(e) => println!("Route Err={}", e)
-    }
+    //if !validate_req(&req) {
+    //    let response = format!("Invalid endpoint {}\n", req.uri().path());
+    //    return Ok(Response::new(Full::new(Bytes::from(response))));
+    //}
 
-    let st = generator::utils::generate_client_id();
-    run(&st[..]);
+    ////println!("{:#?}", client::Client::new(&req));
+    //match route_req(&req) {
+    //    Ok(message) => println!("Route Ok={}", message),
+    //    Err(e) => println!("Route Err={}", e)
+    //}
+
+    //let st = generator::utils::generate_client_id();
+    //run(&st[..]);
     Ok(Response::new(Full::new(Bytes::from("Here i am\n"))))
 }
 

@@ -24,11 +24,10 @@ impl<'a> ClientRepository<'a> {
     }
 
     pub fn create(&self, req: &Client) -> Result<(), String> {
-        //Ok( Self { db_conn })
         Ok(())
     }
 
-    pub fn create_and_save(req: &Request<impl hyper::body::Body>) -> Result<(), String> {
+    pub fn create_and_save(client: &Client ) -> Result<(), String> {
         //Ok( Self { db_conn })
         Ok(())
     }
