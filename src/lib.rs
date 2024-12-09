@@ -4,7 +4,6 @@ use std::convert::Infallible;
 use hyper::body::Bytes;
 use std::error::Error;
 
-pub mod db;
 pub mod client;
 pub mod generator;
 
@@ -15,13 +14,6 @@ pub fn run(st: &str) {
 
 pub async fn handle_client(req: Request<impl hyper::body::Body + std::fmt::Debug>) -> Result<Response<Full<Bytes>>, Infallible> {
 
-    let pool = match db::setup().await {
-        Ok(p) => p,
-        Err(e) => {
-            println!("{:?}", e);
-            return Ok(Response::new(Full::new(Bytes::from("500 Server Error\n".to_string()))))
-        }
-    };
 
 
     //let client_repository = client::ClientRepository::new(&pool);
