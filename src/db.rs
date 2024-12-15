@@ -5,16 +5,12 @@ use std::env;
 use tokio;
 use log::{info, error, debug};
 
-use crate::client::Client;
-
-#[derive(Debug)]
-pub struct DB {
-    pub pool: PooledConn
+#[derive(Debug, Clone)]
+pub struct DbPool {
+    pub pool: Pool
 }
 
-
-pub async fn setup() -> std::result::Result<DB, Box<dyn std::error::Error>> {
-
+pub fn start() -> std::result::Result<DbPool, Box<dyn std::error::Error>> {
     dotenv().ok();
 
     let mut builder = OptsBuilder::new();
@@ -25,19 +21,26 @@ pub async fn setup() -> std::result::Result<DB, Box<dyn std::error::Error>> {
     
     let pool = Pool::new(builder)?;
     let mut conn = pool.get_conn()?;
-    DB::init(&mut conn);
-    Ok(DB{
-        pool: conn
-    })
+    match DbPool::init(&mut conn) {
+        Ok(p) => {
+            Ok(DbPool{
+                pool: pool
+            })
+        },
+        Err(e) => {
+            println!("Error connecting to database:\n {:#?}\n", e);
+            Err(Box::new(e))
+        }
+    }
 }
 
-impl DB {
+impl DbPool {
 
     pub fn init(conn: &mut PooledConn) -> Result<(), Error> {
         match Self::create_clients_table(conn) {
             Ok(_) => Ok(()),
             Err(e) => {
-                error!("{:#?}", &e);
+                println!("Init Erorr:\n {:#?}\n", e);
                 Err(e)
             }
         }
@@ -46,9 +49,11 @@ impl DB {
     pub fn create_clients_table(conn: &mut PooledConn) -> Result<(), Error> {
 
         match Self::table_exists(conn) {
-            Some(v) => {
-                if !v {
-                println!("not found");
+            Err(e) => Err(e),
+            Ok(v) => {
+                if v > Some(0) {
+                    return Ok(());
+                }
                     conn.query_drop(
                         "CREATE TABLE IF NOT EXISTS clients (
                         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, 
@@ -58,37 +63,25 @@ impl DB {
                         client_secret VARCHAR(54) NOT NULL,
                         grant_types VARCHAR(19) NULL
                         )")?;
-                    conn.query_drop(
-                        "CREATE INDEX idx_client_id
-                         ON cients (client_id)
-                         )")?;
-                    }
+                Ok(())
             },
-            _ => ()
         }
-        Ok(())
     }
-    pub fn table_exists(conn: &mut PooledConn) -> Option<bool> {
+    pub fn table_exists(conn: &mut PooledConn) -> Result<Option<u64>, Error> {
         let table = "clients";
-        let stmt = format!("SELECT COUNTS(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{}'", table);
+        let stmt = format!("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='{}'", table);
         let query_res: Result<Option::<u64>> = conn.query_first(stmt);
         match query_res {
             Ok(res) => {
-                Some(true)
+                //println!("go{:?}", res);
+                Ok(res)
             },
             Err(e) =>{
-                eprintln!("{:#?}", e);
-                Some(false)
+                //println!("b{:?}", e);
+                Err(e)
             }
         }
     }
-    pub fn get_user(&self) -> Option<Client> {
-        Some(Client::new())
-    }
-
-    pub fn save_client(&self, client: &Client) -> Result<(), String> {
-        println!("DB: {:#?}", client);
-
-        Ok(())
-    }
 }
+
+

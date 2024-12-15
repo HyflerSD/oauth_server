@@ -3,8 +3,10 @@ use hyper::{Request, Response, Method};
 use std::convert::Infallible;
 use hyper::body::Bytes;
 use std::error::Error;
+use mysql::Pool;
 
 pub mod client;
+pub mod db;
 pub mod generator;
 
 pub fn run(st: &str) {
@@ -12,11 +14,18 @@ pub fn run(st: &str) {
 }
 
 
-pub async fn handle_client(req: Request<impl hyper::body::Body + std::fmt::Debug>) -> Result<Response<Full<Bytes>>, Infallible> {
+pub async fn handle_client(req: Request<impl hyper::body::Body + std::fmt::Debug>, pool: Pool) -> Result<Response<Full<Bytes>>, Infallible> {
 
 
+    println!("here right now");
+    let mut conn = match pool.get_conn() {
+        Ok(conn) => conn,
+        Err(e) => {
+            return Ok(Response::new(Full::new(Bytes::from("Here i am\n"))));
+        }
+    };
 
-    //let client_repository = client::ClientRepository::new(&pool);
+    let client_repository = client::ClientRepository::new(&conn);
 
     //let c = match client::Client::from(&req) {
     //    Ok(client) => client,
