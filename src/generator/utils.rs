@@ -8,10 +8,12 @@ static SEGMENT_LEN: usize = 24;
 static SEPERATORS: usize = 2;
 
 pub fn generate_client_id() -> String {
-    //just temp code bro
     generate(ALPHA_LOWER)
 } 
 
+pub fn generate_auth_token() -> String {
+    generate(ALPHA_LOWER)
+} 
 
 pub fn generate<S: AsRef<str>>(charset: S) -> String {
     let charset_str = charset.as_ref();

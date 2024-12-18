@@ -2,6 +2,7 @@ use http_body_util::Full;
 use hyper::{Request, Response, Method};
 use std::error::Error;
 use mysql::PooledConn;
+use crate::generator::utils;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Client {
@@ -41,15 +42,15 @@ impl<'a> ClientRepository<'a> {
 
     pub fn create(&self, req: &Client) -> Result<(), String> {
         Ok(())
-    }
-
-    pub fn create_and_save(client: &Client ) -> Result<(), String> {
-        //Ok( Self { db_conn })
-        Ok(())
+        //Ok(Client::new());
     }
 
     pub fn delete(&self, client: &Client) -> Result<(), String> {
         Ok(())
+    }
+
+    pub fn exists(&self, email: String) -> bool {
+        false
     }
 
     pub fn save(&self) -> Result<(), String> {

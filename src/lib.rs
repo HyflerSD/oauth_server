@@ -1,4 +1,5 @@
 use http_body_util::Full;
+use url::{Url, ParseError};
 use hyper::{Request, Response, Method};
 use std::convert::Infallible;
 use hyper::body::Bytes;
@@ -9,15 +10,14 @@ pub mod client;
 pub mod db;
 pub mod generator;
 
+use generator::utils;
+
 pub fn run(st: &str) {
     println!("Your code is: {}", st);
 }
 
 
 pub async fn handle_client(req: Request<impl hyper::body::Body + std::fmt::Debug>, pool: Pool) -> Result<Response<Full<Bytes>>, Infallible> {
-
-
-    println!("here right now");
     let mut conn = match pool.get_conn() {
         Ok(conn) => conn,
         Err(e) => {
@@ -25,31 +25,33 @@ pub async fn handle_client(req: Request<impl hyper::body::Body + std::fmt::Debug
         }
     };
 
-    let client_repository = client::ClientRepository::new(&conn);
-
-    //let c = match client::Client::from(&req) {
-    //    Ok(client) => client,
-    //    Err(e) => return Ok(Response::new(Full::new(Bytes::from(e)))),
-    //};
-
-    //println!("created={:?}", client_repository.create(&c));
-
-    //println!("{:?}", c);
+    let mut url = format!("http://www.w.com{}",req.uri());
+    match Url::parse(&url[..]) {
+        Ok(uri) => {
+            println!("{:?}", uri.query_pairs().count());
+        },
+        Err(e) => {
+            ()
+        }
+    }
+    println!("{:?}", url);
 
     //if !validate_req(&req) {
     //    let response = format!("Invalid endpoint {}\n", req.uri().path());
     //    return Ok(Response::new(Full::new(Bytes::from(response))));
     //}
+            Ok(Response::new(Full::new(Bytes::from(format!("Error: {}", "k".to_string())))))
 
-    ////println!("{:#?}", client::Client::new(&req));
     //match route_req(&req) {
-    //    Ok(message) => println!("Route Ok={}", message),
-    //    Err(e) => println!("Route Err={}", e)
+    //    Ok(message) => {
+    //        let val = format!("Code: {}", utils::generate_client_id());
+    //        Ok(Response::new(Full::new(Bytes::from(val))))
+    //    },
+    //    Err(e) => {
+    //        Ok(Response::new(Full::new(Bytes::from(format!("Error: {}", e)))))
+    //    }
     //}
 
-    //let st = generator::utils::generate_client_id();
-    //run(&st[..]);
-    Ok(Response::new(Full::new(Bytes::from("Here i am\n"))))
 }
 
 pub fn route_req(req: &Request<impl hyper::body::Body>) -> Result<String, String> {
@@ -59,8 +61,7 @@ pub fn route_req(req: &Request<impl hyper::body::Body>) -> Result<String, String
             if let Some(endpoint) = Endpoint::from_path(req.uri().path()) {
                 match endpoint {
                     Endpoint::Token => {
-                        println!("Token={:?}", endpoint);
-                        return Ok(String::from("token"))
+                        return Ok(utils::generate_client_id())
                     }
                     _ => {
                         println!("{:?}", endpoint);
